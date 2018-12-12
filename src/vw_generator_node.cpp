@@ -17,7 +17,7 @@ ros::Publisher vw_estimator;
 ros::Publisher d_pose;
 ros::Subscriber wheel_vel_sub;
 
-std_msgs::Float32MultiArray vw_estimate_msg;
+geometry_msgs::Twist vw_estimate_msg;
 
 float current_L_vel = 0;
 float current_R_vel = 0;
@@ -36,12 +36,10 @@ void encoderCallback(const std_msgs::Float32MultiArray::ConstPtr& array)
     vhat = 0.5*(current_R_vel+current_L_vel);
     what = (current_R_vel-current_L_vel)/AXEL_WIDTH;
 
-	vw_estimate_msg.data.push_back(vhat);   // add info to message (arra$
-	vw_estimate_msg.data.push_back(what);
+	vw_estimate_msg.linear.x = vhat;   // add info to message (arra$
+	vw_estimate_msg.angular.z = what;
 
 	vw_estimator.publish(vw_estimate_msg);    // publish data
-	vw_estimate_msg.data.clear();
-	deltaPose();
 }
 
 void deltaPose()
@@ -65,7 +63,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, NODE_NAME);
 	ros::NodeHandle nh;
 	
-	vw_estimator = nh.advertise<std_msgs::Float32MultiArray>(ADVERTISE_VW_ESTIMATE, BUFFER_SIZE);
+	vw_estimator = nh.advertise<geometry_msgs::Twist>(ADVERTISE_VW_ESTIMATE, BUFFER_SIZE);
 	d_pose = nh.advertise<geometry_msgs::Twist>("d_pose", 1);
 	wheel_vel_sub = nh.subscribe<std_msgs::Float32MultiArray>(SUBSCRIBE_WHEEL_VEL, BUFFER_SIZE, encoderCallback);
 
